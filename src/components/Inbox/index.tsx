@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState, useMemo, lazy, Suspense } from 'react'
+import React, { useEffect, useRef, useState, useMemo } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { useQuestions } from 'hooks/useQuestions'
 import ScrollArea from 'components/RadixUI/ScrollArea'
@@ -7,15 +7,13 @@ import dayjs from 'dayjs'
 import relativeTime from 'dayjs/plugin/relativeTime'
 import { Question, QuestionForm } from 'components/Squeak'
 import OSButton from 'components/OSButton'
-import { IconSidePanel, IconBottomPanel, IconChevronDown, IconNotification, IconPin, IconCheck } from '@posthog/icons'
+import { IconSidePanel, IconBottomPanel, IconChevronDown, IconNotification } from '@posthog/icons'
 import Switch from 'components/RadixUI/Switch'
 import { ToggleGroup } from 'components/RadixUI/ToggleGroup'
 import { useToast } from '../../context/Toast'
 import { QuestionData, StrapiRecord } from 'lib/strapi'
 import { useUser } from 'hooks/useUser'
 import { navigate } from 'gatsby'
-import hourglassAnimation from 'images/icons8-hourglass.json'
-import hourglassAnimationWhite from 'images/icons8-hourglass-white.json'
 import { useInView } from 'react-intersection-observer'
 import useTopicsNav from '../../navs/useTopicsNav'
 import { useWindow } from '../../context/Window'
@@ -29,10 +27,8 @@ import { Select } from 'components/RadixUI/Select'
 import SEO from 'components/seo'
 import SearchProvider, { useSearch } from 'components/Editor/SearchProvider'
 import { InlineSearch, AlgoliaSearchResults } from 'components/Search/InlineSearch'
+import ProBoardsList from './ProBoardsList'
 dayjs.extend(relativeTime)
-
-// lottie-react bundles lottie-web (~600 KiB); load it on demand instead of on every page.
-const Lottie = typeof window !== 'undefined' ? lazy(() => import('lottie-react')) : () => null
 
 const Menu = ({ onValueChange }: { onValueChange: (value: string) => void }) => {
     const { user } = useUser()
@@ -146,98 +142,6 @@ const SidebarContent = ({
 }
 
 const SIDE_WIDTH_DEFAULT = 600
-
-interface QuestionRowProps {
-    question: any
-    lastQuestionRef: (node?: Element | null) => void
-    appWindowPath?: string
-    bottomHeight: number
-    setBottomHeight: (height: number) => void
-    containerRef: React.RefObject<HTMLDivElement>
-    pinned?: boolean
-}
-
-const QuestionRow = ({
-    question,
-    lastQuestionRef,
-    appWindowPath,
-    bottomHeight,
-    setBottomHeight,
-    containerRef,
-    pinned = false,
-}: QuestionRowProps) => {
-    const { subject, numReplies, activeAt, replies, profile, permalink, resolved } = question
-    const replyList = Array.isArray(replies?.data) ? replies.data : Object.values(replies ?? {})
-    const lastReply = replyList[replyList.length - 1]
-    const latestAuthor = lastReply?.profile || lastReply?.attributes?.profile || profile
-    const active = `/questions/${permalink}` === appWindowPath
-
-    return (
-        <div key={question.id} ref={lastQuestionRef}>
-            <OSButton
-                asLink
-                to={`/questions/${permalink}`}
-                align="left"
-                width="full"
-                hover="background"
-                size="md"
-                key={question.id}
-                className={` 
-                    flex-wrap @3xl:flex-nowrap !gap-0 @3xl:!gap-1 !items-start
-                    ${active ? 'font-bold bg-accent' : ''}
-                    ${pinned ? 'bg-accent border-b border-primary' : ''}
-                `}
-                onClick={() => {
-                    if (!containerRef.current) return
-                    if (bottomHeight <= 45) {
-                        setBottomHeight(containerRef.current.getBoundingClientRect().height * 0.8)
-                    }
-                }}
-            >
-                <div
-                    className={`shrink-0 w-7 @3xl:basis-auto basis-[5%] @3xl:block ${
-                        pinned || resolved ? '' : 'hidden'
-                    }`}
-                >
-                    {pinned ? (
-                        <Tooltip trigger={<IconPin className="size-full max-w-5" />}>Pinned</Tooltip>
-                    ) : resolved ? (
-                        <Tooltip trigger={<IconCheck className="size-full max-w-5 text-green" />}>Resolved</Tooltip>
-                    ) : null}
-                </div>
-
-                <div
-                    className={`order-1 @3xl:order-none @3xl:w-48 @3xl:block @3xl:basis-auto ${
-                        pinned || resolved ? 'basis-[65%]' : 'basis-[75%]'
-                    }`}
-                >
-                    {profile?.firstName} {profile?.lastName}
-                    <span className="text-muted text-sm ml-1 @3xl:hidden">{numReplies}</span>
-                </div>
-                <div
-                    className={`order-3 @3xl:order-none flex-[1_0_100%] @3xl:flex-1 ${
-                        active ? 'font-medium @3xl:font-bold' : 'font-medium'
-                    }`}
-                >
-                    {subject}
-                </div>
-                <div className="hidden @3xl:block w-24 text-center">{numReplies}</div>
-                <div
-                    className={`order-2 text-right @3xl:text-left @3xl:basis-auto @3xl:w-60 font-normal ${
-                        pinned || resolved ? 'basis-[30%]' : 'basis-[25%]'
-                    }`}
-                >
-                    <Tooltip trigger={dayjs(activeAt).fromNow()}>
-                        {dayjs(activeAt).format('dddd, MMMM D, YYYY')} at {dayjs(activeAt).format('h:mm A')}
-                    </Tooltip>{' '}
-                    <span className="hidden @3xl:inline-block">
-                        by {latestAuthor?.firstName} {latestAuthor?.lastName}
-                    </span>
-                </div>
-            </OSButton>
-        </div>
-    )
-}
 
 const layoutOptions = [
     {
@@ -435,6 +339,7 @@ export default function Inbox(props) {
     const [ready, setReady] = useState(props.path !== '/questions/subscriptions')
     const [filters, setFilters] = useState(defaultFilters)
     const { addToast } = useToast()
+    const { addWindow } = useApp()
     const { user, setSubscription, isSubscribed, isValidating } = useUser()
     const { questions, isLoading, fetchMore, hasMore, refresh, pinnedQuestions } = useQuestions({
         limit: 20,
@@ -582,72 +487,45 @@ export default function Inbox(props) {
                             >
                                 <div className={`@container flex-1 min-h-0 text-sm ${sideBySide ? 'w-0' : 'w-full'}`}>
                                     <ScrollArea className="h-full">
-                                        <div className="flex items-center pl-2.5 pr-4 py-2 border-b border-primary font-medium bg-accent text-sm bg-accent-2 sticky top-0 text-primary z-10 whitespace-nowrap">
-                                            <div className="w-8 shrink-0 @3xl:block hidden" />
-                                            <div className="hidden @3xl:block w-48">Author</div>
-                                            <div className="flex-1">
-                                                <span className="@3xl:hidden">Author / Replies</span>
-                                                <span className="hidden @3xl:block">Subject</span>
-                                            </div>
-                                            <div className="hidden @3xl:block w-24 text-center">Replies</div>
-                                            <div className="w-60 text-right @3xl:text-left">Last activity</div>
-                                        </div>
-                                        <div className="px-1 py-1 space-y-px">
-                                            {pinnedQuestions?.map((question) => (
-                                                <QuestionRow
-                                                    key={question.id}
-                                                    question={question}
-                                                    lastQuestionRef={lastQuestionRef}
-                                                    appWindowPath={appWindow?.path}
-                                                    bottomHeight={bottomHeight}
-                                                    setBottomHeight={setBottomHeight}
-                                                    containerRef={containerRef}
-                                                    pinned
-                                                />
-                                            ))}
-                                            {(showSubscribedQuestions
-                                                ? subscribedQuestions
-                                                : flattenStrapiResponse(questions.data)?.filter(
-                                                      (question) => !question?.pinnedTopics?.[0]
-                                                  )
-                                            )?.map((question) => (
-                                                <QuestionRow
-                                                    key={question.id}
-                                                    question={question}
-                                                    lastQuestionRef={lastQuestionRef}
-                                                    appWindowPath={appWindow?.path}
-                                                    bottomHeight={bottomHeight}
-                                                    setBottomHeight={setBottomHeight}
-                                                    containerRef={containerRef}
-                                                />
-                                            ))}
-                                            {!isLoading && (!questions.data || questions.data.length === 0) && (
-                                                <div className="flex flex-col items-center justify-center py-12 px-4 text-center text-primary">
-                                                    <div className="text-lg mb-2 font-semibold">No questions found</div>
-                                                    <div className="text-secondary text-sm">
-                                                        {props.path === '/questions/subscriptions'
-                                                            ? "You haven't subscribed to any questions yet."
-                                                            : 'There are no questions in this topic yet.'}
-                                                    </div>
-                                                </div>
-                                            )}
-                                            {isLoading && (
-                                                <div className="flex items-center justify-center py-8 h-full">
-                                                    <Suspense fallback={null}>
-                                                        <Lottie
-                                                            animationData={hourglassAnimation}
-                                                            className="size-6 opacity-75 dark:hidden"
-                                                            title="Loading questions..."
-                                                        />
-                                                        <Lottie
-                                                            animationData={hourglassAnimationWhite}
-                                                            className="size-6 opacity-75 hidden dark:block"
-                                                            title="Loading questions..."
-                                                        />
-                                                    </Suspense>
-                                                </div>
-                                            )}
-                                        </div>
+                                        <ProBoardsList
+                                            questions={
+                                                showSubscribedQuestions
+                                                    ? subscribedQuestions
+                                                    : flattenStrapiResponse(questions.data)
+                                            }
+                                            pinnedQuestions={showSubscribedQuestions ? [] : pinnedQuestions}
+                                            isLoading={isLoading}
+                                            isEmpty={
+                                                (showSubscribedQuestions
+                                                    ? !subscribedQuestions || subscribedQuestions.length === 0
+                                                    : !questions.data || questions.data.length === 0) &&
+                                                (!pinnedQuestions || pinnedQuestions.length === 0)
+                                            }
+                                            appWindowPath={appWindow?.path}
+                                            boardLabel={
+                                                showSubscribedQuestions ? 'My subscriptions' : data?.topic?.label
+                                            }
+                                            onRowClick={() => {
+                                                if (!containerRef.current) return
+                                                if (bottomHeight <= 45) {
+                                                    setBottomHeight(
+                                                        containerRef.current.getBoundingClientRect().height * 0.8
+                                                    )
+                                                }
+                                            }}
+                                            onNewThread={() =>
+                                                addWindow(
+                                                    <AskAQuestion
+                                                        newWindow
+                                                        location={{ pathname: `ask-a-question` }}
+                                                        key={`ask-a-question`}
+                                                        onSubmit={refresh}
+                                                    />
+                                                )
+                                            }
+                                        />
+                                        {/* Sentinel keeps the existing infinite-scroll (useInView) working. */}
+                                        <div ref={lastQuestionRef} />
                                     </ScrollArea>
                                 </div>
                                 <AnimatePresence>
