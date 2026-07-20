@@ -45,12 +45,12 @@ const ProBoardsRow = ({ question, pinned = false, alt = false, appWindowPath, on
         <tr className={`pb-r${alt ? ' alt' : ''}`}>
             <td className="pb-ico">{threadIcon(question, pinned)}</td>
             <td className="pb-sub">
-                <Link to={to} onClick={onRowClick} state={{ fromForum: true }}>
+                <Link to={to} onClick={onRowClick}>
                     {active ? <b>{subject}</b> : subject}
                 </Link>
             </td>
             <td className="pb-startedby">{fullName(profile)}</td>
-            <td className="c pb-views">{numReplies ?? 0}</td>
+            <td className="c pb-replies">{numReplies ?? 0}</td>
             <td className="c pb-views">{derivedViews(numReplies)}</td>
             <td className="pb-last">
                 {activeAt ? dayjs(activeAt).fromNow() : '—'}
@@ -115,7 +115,7 @@ export default function ProBoardsList({
                         <td />
                         <td>Subject</td>
                         <td className="pb-startedby">Started by</td>
-                        <td className="c pb-views">Replies</td>
+                        <td className="c pb-replies">Replies</td>
                         <td className="c pb-views">Views</td>
                         <td style={{ textAlign: 'right' }}>Last Post</td>
                     </tr>
