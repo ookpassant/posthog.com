@@ -1,0 +1,205 @@
+/*
+ * ProBoards-style skin for the community forum list.
+ * Everything is scoped under `.pb` so it can't leak into the rest of the OS.
+ * This is a deliberately light, 2004-era board theme — it does not follow the
+ * app's light/dark scheme on purpose.
+ */
+.pb {
+    font-family: Verdana, Tahoma, Geneva, sans-serif;
+    font-size: 11px;
+    color: #33373d;
+    background: #e3e9f2;
+    padding: 12px;
+    min-height: 100%;
+    box-sizing: border-box;
+}
+.pb * {
+    box-sizing: border-box;
+}
+.pb a {
+    color: #20507f;
+    text-decoration: none;
+}
+.pb a:hover {
+    text-decoration: underline;
+}
+
+.pb-mast {
+    background: linear-gradient(180deg, #3f6699, #294a73);
+    color: #fff;
+    border: 1px solid #1d3a5c;
+    border-radius: 4px 4px 0 0;
+    padding: 14px 16px;
+}
+.pb-logo {
+    font-size: 20px;
+    font-weight: 700;
+    letter-spacing: 0.4px;
+    text-shadow: 0 1px 1px rgba(0, 0, 0, 0.4);
+}
+.pb-tag {
+    font-size: 11px;
+    color: #cdddef;
+    margin-top: 2px;
+    font-style: italic;
+}
+
+.pb-crumb {
+    background: #c9d8ea;
+    border: 1px solid #a9c0dd;
+    border-top: none;
+    padding: 6px 10px;
+    font-size: 11px;
+    color: #3a4a5e;
+}
+.pb-crumb b {
+    color: #22364a;
+}
+
+.pb-toolbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 2px;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+.pb-btn {
+    font-family: inherit;
+    font-size: 11px;
+    font-weight: 700;
+    color: #fff;
+    background: linear-gradient(#6f9fd6, #3d6fae);
+    border: 1px solid #2c568c;
+    border-radius: 3px;
+    padding: 4px 12px;
+    cursor: pointer;
+    text-shadow: 0 1px 1px rgba(0, 0, 0, 0.3);
+}
+.pb-btn:hover {
+    background: linear-gradient(#7cabde, #4879b8);
+}
+.pb-pages {
+    font-size: 11px;
+    color: #556;
+}
+
+.pb-tbl {
+    width: 100%;
+    border-collapse: collapse;
+    border: 1px solid #9db6d6;
+    background: #fff;
+    table-layout: fixed;
+}
+.pb-cat td {
+    background: linear-gradient(180deg, #3f6699, #294a73);
+    color: #fff;
+    font-weight: 700;
+    font-size: 12px;
+    padding: 6px 10px;
+    border: 1px solid #22406a;
+}
+.pb-ch td {
+    background: linear-gradient(#dbe6f4, #c3d4ea);
+    color: #33507a;
+    font-weight: 700;
+    font-size: 10px;
+    padding: 4px 10px;
+    border: 1px solid #b3c6e0;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+}
+.pb-ch td.c {
+    text-align: center;
+    width: 58px;
+}
+.pb-r td {
+    padding: 8px 10px;
+    border: 1px solid #dbe4f0;
+    vertical-align: middle;
+}
+.pb-r.alt td {
+    background: #eef3fa;
+}
+.pb-r td.c {
+    text-align: center;
+    color: #556;
+}
+.pb-ico {
+    width: 30px;
+    text-align: center;
+    font-size: 17px;
+}
+.pb-sub a {
+    font-weight: 700;
+    font-size: 12px;
+    word-break: break-word;
+}
+.pb-sub .pb-preview {
+    display: block;
+    color: #6a7686;
+    font-weight: 400;
+    font-size: 10.5px;
+    margin-top: 2px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.pb-last {
+    font-size: 10px;
+    color: #666;
+    white-space: nowrap;
+    text-align: right;
+    width: 150px;
+}
+.pb-last span {
+    color: #8894a6;
+}
+.pb-new {
+    display: inline-block;
+    font-size: 8px;
+    font-weight: 700;
+    color: #fff;
+    background: #2f8f5b;
+    padding: 1px 5px;
+    border-radius: 8px;
+    vertical-align: middle;
+    margin-left: 6px;
+    letter-spacing: 0.4px;
+}
+.pb-foot {
+    background: linear-gradient(#dbe6f4, #c3d4ea);
+    border: 1px solid #b3c6e0;
+    border-top: none;
+    padding: 8px 10px;
+    font-size: 10px;
+    color: #4a5c73;
+    border-radius: 0 0 4px 4px;
+}
+.pb-foot span {
+    color: #7a8aa0;
+    font-style: italic;
+}
+.pb-empty td {
+    padding: 26px 10px;
+    text-align: center;
+    color: #6a7686;
+    font-size: 11px;
+}
+.pb-loading {
+    padding: 22px 10px;
+    text-align: center;
+    color: #6a7686;
+    font-size: 11px;
+}
+
+/* Narrow forum windows: drop the quieter columns, ProBoards-on-a-phone style. */
+@media (max-width: 640px) {
+    .pb-startedby,
+    .pb-views {
+        display: none;
+    }
+    .pb-last {
+        width: auto;
+    }
+}
